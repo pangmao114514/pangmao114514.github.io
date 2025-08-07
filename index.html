@@ -3,102 +3,763 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QQ头像查询</title>
+    <title>DeepSeek 智能助手</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e6e6e6;
+            min-height: 100vh;
+            display: flex;
+            overflow: hidden;
         }
+        
         .container {
-            max-width: 500px;
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            max-width: 1600px;
             margin: 0 auto;
-            padding: 20px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
         }
-        input {
-            padding: 8px;
-            width: 200px;
-            margin-right: 10px;
+        
+        /* 侧边栏样式 */
+        .sidebar {
+            width: 280px;
+            background: rgba(20, 25, 40, 0.8);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px 15px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            z-index: 10;
         }
-        button {
-            padding: 8px 15px;
-            background-color: #4CAF50;
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            padding: 0 10px 20px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+        }
+        
+        .logo-icon i {
+            font-size: 22px;
+            color: white;
+        }
+        
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .new-chat-btn {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 12px;
+            padding: 12px 15px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        #avatarContainer {
-            margin-top: 20px;
-            min-height: 200px;
             display: flex;
+            align-items: center;
             justify-content: center;
+            margin: 15px 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .new-chat-btn i {
+            margin-right: 8px;
+        }
+        
+        .new-chat-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(106, 17, 203, 0.4);
+        }
+        
+        .history {
+            flex: 1;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        
+        .history-title {
+            font-size: 14px;
+            color: #a0a0c0;
+            padding: 10px 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .history-item {
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin: 5px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background 0.3s;
+        }
+        
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .history-item i {
+            margin-right: 10px;
+            color: #6a11cb;
+        }
+        
+        .tools {
+            padding: 15px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .tool-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin: 8px 0;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .tool-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .tool-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(106, 17, 203, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+        }
+        
+        .tool-icon i {
+            color: #6a11cb;
+        }
+        
+        .tool-info h3 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+        
+        .tool-info p {
+            font-size: 13px;
+            color: #a0a0c0;
+        }
+        
+        /* 主聊天区域 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .chat-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .chat-title {
+            font-size: 22px;
+            font-weight: 700;
+            display: flex;
             align-items: center;
         }
-        #avatar {
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
+        
+        .chat-title i {
+            margin-right: 10px;
+            color: #6a11cb;
         }
-        #avatar:hover {
+        
+        .model-select {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 8px 15px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .chat-container {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message {
+            max-width: 85%;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 15px;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message {
+            background: rgba(106, 17, 203, 0.15);
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .ai-message {
+            background: rgba(37, 117, 252, 0.15);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .message-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-weight: bold;
+        }
+        
+        .user-avatar {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        }
+        
+        .ai-avatar {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .message-content {
+            line-height: 1.6;
+            font-size: 16px;
+        }
+        
+        .message-content p {
+            margin-bottom: 10px;
+        }
+        
+        .message-content code {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .message-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        /* 输入区域 */
+        .input-container {
+            padding: 20px 30px;
+            position: relative;
+        }
+        
+        .input-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .input-box textarea {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 16px;
+            resize: none;
+            height: 24px;
+            max-height: 150px;
+            outline: none;
+            padding: 5px 0;
+        }
+        
+        .input-box textarea::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .send-button {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .send-button:hover {
             transform: scale(1.05);
         }
-        .error {
-            color: #ff0000;
-            margin-top: 10px;
+        
+        .send-button i {
+            color: white;
+            font-size: 18px;
+        }
+        
+        .input-hints {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+            gap: 12px;
+        }
+        
+        .hint {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .hint:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 900px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .logo-text, .history-title, .tool-info, .history-item span {
+                display: none;
+            }
+            
+            .logo {
+                justify-content: center;
+                padding: 15px 0 20px;
+            }
+            
+            .logo-icon {
+                margin-right: 0;
+            }
+            
+            .new-chat-btn span {
+                display: none;
+            }
+            
+            .new-chat-btn i {
+                margin-right: 0;
+            }
+            
+            .tool-item {
+                justify-content: center;
+            }
+            
+            .tool-icon {
+                margin-right: 0;
+            }
+            
+            .tool-info {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                flex-direction: row;
+                padding: 10px;
+                overflow-x: auto;
+                overflow-y: hidden;
+            }
+            
+            .logo {
+                padding: 0 10px;
+                border: none;
+                margin: 0;
+            }
+            
+            .new-chat-btn {
+                margin: 0 10px;
+                padding: 8px 15px;
+            }
+            
+            .history {
+                display: flex;
+                margin: 0 5px;
+                overflow-x: auto;
+                overflow-y: hidden;
+            }
+            
+            .history-title {
+                display: none;
+            }
+            
+            .history-item {
+                flex-shrink: 0;
+                margin: 0 5px;
+            }
+            
+            .tools {
+                display: none;
+            }
+            
+            .message {
+                max-width: 95%;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>QQ头像查询</h2>
-        <div>
-            <input type="text" id="qqInput" placeholder="请输入QQ号" maxlength="13">
-            <button onclick="getAvatar()">查询头像</button>
-        </div>
-        <div id="avatarContainer"></div>
-    </div>
-
-    <script>
-        function getAvatar() {
-            const qqInput = document.getElementById('qqInput');
-            const qqNumber = qqInput.value.trim();
-            const avatarContainer = document.getElementById('avatarContainer');
-
-            // 简单验证QQ号格式（5-13位数字）
-            if (!/^\d{5,13}$/.test(qqNumber)) {
-                avatarContainer.innerHTML = '<p class="error">请输入有效的QQ号（5-13位数字）</p>';
-                return;
-            }
-
-            // QQ头像接口（不同尺寸：40/100/140/640）
-            const avatarUrl = `https://q1.qlogo.cn/g?b=qq&nk=${qqNumber}&s=100`;
+        <!-- 左侧边栏 -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div class="logo-text">DeepSeek</div>
+            </div>
             
-            // 创建图片元素并显示
-            const img = document.createElement('img');
-            img.id = 'avatar';
-            img.src = avatarUrl;
-            img.alt = `${qqNumber}的QQ头像`;
-            img.width = 100;
-            img.height = 100;
+            <button class="new-chat-btn">
+                <i class="fas fa-plus"></i>
+                <span>新聊天</span>
+            </button>
+            
+            <div class="history">
+                <div class="history-title">最近对话</div>
+                <div class="history-item">
+                    <i class="fas fa-comment"></i>
+                    <span>Python代码调试</span>
+                </div>
+                <div class="history-item">
+                    <i class="fas fa-comment"></i>
+                    <span>旅行计划建议</span>
+                </div>
+                <div class="history-item">
+                    <i class="fas fa-comment"></i>
+                    <span>机器学习问题</span>
+                </div>
+                <div class="history-item">
+                    <i class="fas fa-comment"></i>
+                    <span>健身计划制定</span>
+                </div>
+            </div>
+            
+            <div class="tools">
+                <div class="tool-item">
+                    <div class="tool-icon">
+                        <i class="fas fa-file-code"></i>
+                    </div>
+                    <div class="tool-info">
+                        <h3>代码助手</h3>
+                        <p>编写和调试代码</p>
+                    </div>
+                </div>
+                
+                <div class="tool-item">
+                    <div class="tool-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="tool-info">
+                        <h3>学习助手</h3>
+                        <p>解答学习问题</p>
+                    </div>
+                </div>
+                
+                <div class="tool-item">
+                    <div class="tool-icon">
+                        <i class="fas fa-language"></i>
+                    </div>
+                    <div class="tool-info">
+                        <h3>翻译助手</h3>
+                        <p>多语言翻译</p>
+                    </div>
+                </div>
+                
+                <div class="tool-item">
+                    <div class="tool-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <div class="tool-info">
+                        <h3>创意生成</h3>
+                        <p>内容创作助手</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 主聊天区域 -->
+        <div class="main-content">
+            <div class="chat-header">
+                <div class="chat-title">
+                    <i class="fas fa-comments"></i>
+                    <span>DeepSeek 智能助手</span>
+                </div>
+                <select class="model-select">
+                    <option>DeepSeek-R1 模型</option>
+                    <option>DeepSeek-Coder 模型</option>
+                    <option>DeepSeek-Math 模型</option>
+                </select>
+            </div>
+            
+            <div class="chat-container" id="chatContainer">
+                <div class="message ai-message">
+                    <div class="message-header">
+                        <div class="avatar ai-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <strong>DeepSeek 助手</strong>
+                    </div>
+                    <div class="message-content">
+                        <p>你好！我是DeepSeek智能助手，很高兴为你服务！</p>
+                        <p>我可以帮助你解答各种问题，包括编程、学习、翻译、写作等。你可以问我：</p>
+                        <ul>
+                            <li>如何用Python实现一个排序算法？</li>
+                            <li>解释一下量子力学的基本概念</li>
+                            <li>将这段中文翻译成英文</li>
+                            <li>帮我规划一个周末旅行计划</li>
+                        </ul>
+                        <p>请随时告诉我你的需求！</p>
+                    </div>
+                </div>
+                
+                <div class="message user-message">
+                    <div class="message-header">
+                        <div class="avatar user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <strong>用户</strong>
+                    </div>
+                    <div class="message-content">
+                        <p>你好！能帮我写一个Python函数来计算斐波那契数列吗？</p>
+                    </div>
+                </div>
+                
+                <div class="message ai-message">
+                    <div class="message-header">
+                        <div class="avatar ai-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <strong>DeepSeek 助手</strong>
+                    </div>
+                    <div class="message-content">
+                        <p>当然可以！下面是一个计算斐波那契数列第n项的Python函数：</p>
+                        <pre><code>def fibonacci(n):
+    """计算斐波那契数列的第n项"""
+    if n <= 0:
+        return "输入必须为正整数"
+    elif n == 1:
+        return 0
+    elif n == 2:
+        return 1
+    else:
+        a, b = 0, 1
+        for _ in range(2, n):
+            a, b = b, a + b
+        return b
 
-            // 处理图片加载失败的情况
-            img.onerror = function() {
-                avatarContainer.innerHTML = '<p class="error">无法获取该QQ号的头像，请检查QQ号是否正确</p>';
-            };
-
-            avatarContainer.innerHTML = '';
-            avatarContainer.appendChild(img);
-        }
-
-        // 支持回车键查询
-        document.getElementById('qqInput').addEventListener('keyup', function(event) {
-            if (event.key === 'Enter') {
-                getAvatar();
+# 示例：计算前10项
+for i in range(1, 11):
+    print(f"斐波那契数列第{i}项: {fibonacci(i)}")</code></pre>
+                        <p>这个函数使用迭代方法高效地计算斐波那契数列。如果你想使用递归方法或者其他优化方法，我也可以提供。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="input-container">
+                <div class="input-box">
+                    <textarea id="messageInput" placeholder="向DeepSeek发送消息..." rows="1"></textarea>
+                    <button class="send-button" id="sendButton">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="input-hints">
+                    <div class="hint">解释量子计算</div>
+                    <div class="hint">写一封求职信</div>
+                    <div class="hint">推荐学习资源</div>
+                    <div class="hint">帮我翻译句子</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 获取DOM元素
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const chatContainer = document.getElementById('chatContainer');
+        const hints = document.querySelectorAll('.hint');
+        
+        // 调整输入框高度
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+        
+        // 发送消息
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message) {
+                // 添加用户消息
+                addMessage(message, 'user');
+                
+                // 清空输入框
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+                
+                // 模拟AI回复
+                setTimeout(() => {
+                    addMessage(getAIResponse(message), 'ai');
+                }, 1000);
             }
+        }
+        
+        // 添加消息到聊天框
+        function addMessage(content, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            const messageHeader = document.createElement('div');
+            messageHeader.className = 'message-header';
+            
+            const avatar = document.createElement('div');
+            avatar.className = `avatar ${sender}-avatar`;
+            
+            const icon = document.createElement('i');
+            icon.className = sender === 'user' ? 'fas fa-user' : 'fas fa-robot';
+            avatar.appendChild(icon);
+            
+            const name = document.createElement('strong');
+            name.textContent = sender === 'user' ? '用户' : 'DeepSeek 助手';
+            
+            messageHeader.appendChild(avatar);
+            messageHeader.appendChild(name);
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.innerHTML = `<p>${content.replace(/\n/g, '<br>')}</p>`;
+            
+            messageDiv.appendChild(messageHeader);
+            messageDiv.appendChild(messageContent);
+            
+            chatContainer.appendChild(messageDiv);
+            
+            // 滚动到底部
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        // 生成AI回复（模拟）
+        function getAIResponse(message) {
+            const responses = [
+                "这是一个有趣的问题！让我来为你解答...",
+                "我理解你的需求，以下是我的建议：",
+                "感谢你的提问！下面是我对这个问题的看法：",
+                "这个问题很有深度，让我尝试为你解释："
+            ];
+            
+            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+            
+            // 根据特定问题提供定制回答
+            if (message.toLowerCase().includes('hello') || message.includes('你好')) {
+                return "你好！很高兴与你交流。有什么我可以帮助你的吗？";
+            } else if (message.toLowerCase().includes('python')) {
+                return "Python是一个很棒的编程语言！这里有一个简单的Python示例：\n\n```python\nprint('Hello, World!')\n```\n\n这个程序会输出 'Hello, World!'。如果你有更具体的问题，我很乐意帮你解答！";
+            } else if (message.toLowerCase().includes('旅行') || message.includes('旅游')) {
+                return "旅行计划建议：\n1. 确定目的地和预算\n2. 研究当地天气和最佳旅行时间\n3. 预订交通和住宿\n4. 规划主要景点和活动\n5. 准备必要的旅行文件和保险\n\n需要我帮你规划具体的行程吗？";
+            } else if (message.toLowerCase().includes('健身')) {
+                return "健身计划建议：\n1. 确定你的健身目标（减脂、增肌、耐力等）\n2. 每周安排3-5次训练\n3. 结合有氧运动和力量训练\n4. 注意合理饮食和充足休息\n5. 定期评估进展并调整计划\n\n需要我为你制定个性化的健身计划吗？";
+            }
+            
+            return `${randomResponse} 你提到的是 "${message}"，这是一个很好的问题。在现实场景中，我会根据你的具体需求提供详细的解答、代码示例或者分步指导。`;
+        }
+        
+        // 事件监听
+        sendButton.addEventListener('click', sendMessage);
+        
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        // 提示点击事件
+        hints.forEach(hint => {
+            hint.addEventListener('click', () => {
+                messageInput.value = hint.textContent;
+                messageInput.focus();
+            });
+        });
+        
+        // 新聊天按钮
+        document.querySelector('.new-chat-btn').addEventListener('click', () => {
+            chatContainer.innerHTML = `
+                <div class="message ai-message">
+                    <div class="message-header">
+                        <div class="avatar ai-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <strong>DeepSeek 助手</strong>
+                    </div>
+                    <div class="message-content">
+                        <p>你好！新对话已开始。有什么我可以帮助你的？</p>
+                    </div>
+                </div>
+            `;
         });
     </script>
 </body>
